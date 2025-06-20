@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>Main Links</title>
+  <link rel='stylesheet' href='https://netdna.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css'><style>* {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+        }
+        
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .sidebar {
+            width: 200px;
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-right: 1px solid #ddd;
+        }
+
+        .sidebar-item {
+            padding: 10px;
+            margin-bottom: 5px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .sidebar-item:hover {
+            background-color: #e0e0e0;
+        }
+
+        .sidebar-item.active {
+            background-color: #d0d0d0;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .content-section {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .link-list {
+            margin-top: 20px;
+        }
+
+        .link-item {
+            display: block;
+            padding: 10px;
+            margin-bottom: 8px;
+            background-color: #f8f8f8;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #333;
+            transition: background-color 0.2s;
+        }
+
+        .link-item:hover {
+            background-color: #eee;
+        }
+
+        .text-content {
+            margin-top: 20px;
+            line-height: 1.6;
+            font-family: 'Monaco', 'Consolas', monospace;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+        }
+
+        .text-content p {
+            margin-bottom: 10px;
+        }
+
+.editable-section {
+    margin-top: 20px;
+}
+
+.content-notes {
+    width: 100%;
+    min-height: 100px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+    font-family: 'Monaco', 'Consolas', monospace;
+    line-height: 1.6;
+    resize: vertical;
+    color: #333;
+    transition: border-color 0.2s, background-color 0.2s;
+}
+
+.content-notes:hover {
+    background-color: #f8f8f8;
+}
+
+.content-notes:focus {
+    outline: none;
+    border-color: #d0d0d0;
+    background-color: #fff;
+}
+
+
+/* Add these new styles for the copy button */
+.copy-button {
+    margin-top: 10px;
+    padding: 8px 16px;
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.copy-button:hover {
+    background-color: #e0e0e0;
+}
+
+.copy-button.copied {
+    background-color: #4CAF50;
+    color: white;
+}
+
+/* Link navigation styles */
+.link-navigation {
+    background-color: #f0f0f0;
+    padding: 10px 20px;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: center;
+}
+
+.link-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.nav-button {
+    padding: 8px 12px;
+    min-width: 60px;
+    background-color: #e0e0e0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-weight: bold;
+}
+
+.nav-button:hover {
+    background-color: #d0d0d0;
+}
+
+.nav-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.link-counter {
+    font-size: 16px;
+    font-weight: bold;
+    min-width: 30px;
+    text-align: center;
+}
+
+.goto-link {
+    margin-left: 15px;
+    padding: 8px 16px;
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-weight: bold;
+}
+
+.goto-link:hover {
+    background-color: #3a80d2;
+}
+
+.link-input {
+    width: 60px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.goto-number-link {
+    padding: 8px 12px;
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.goto-number-link:hover {
+    background-color: #3a80d2;
+}
+
+.key-hint {
+    font-size: 12px;
+    color: #666;
+    margin: 0 5px;
+    font-weight: normal;
+}
+
+.link-item-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.link-number {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    background-color: #e0e0e0;
+    border-radius: 50%;
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+.active-link {
+    border-left: 3px solid #4a90e2;
+    background-color: #f0f8ff;
+}
+
+/* Prism.js syntax highlighting styles */
+pre[class*="language-"] {
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 1em;
+    margin: 1em 0;
+    overflow: auto;
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+code[class*="language-"] {
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 14px;
+}
+
+pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+</style>
+
+<!-- Prism.js CSS for syntax highlighting -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<!-- partial:index.partial.html -->
+<div class="sidebar" id="sidebar"></div>
+<div class="main-container">
+    <div class="link-navigation">
+        <div class="link-controls">
+            <button class="nav-button" id="prevSidebar">◀ (Z[)</button>
+            <button class="nav-button" id="prevLink">- (-)</button>
+            <span class="link-counter" id="linkCounter">1</span>
+            <button class="nav-button" id="nextLink">+ (=)</button>
+            <button class="goto-link" id="gotoLink">Go to Link (L)</button>
+            <input type="number" class="link-input" id="linkInput" placeholder="#" min="1">
+            <span class="key-hint">(ESC)</span>
+            <button class="goto-number-link" id="gotoNumberLink">Go</button>
+            <button class="nav-button" id="nextSidebar">▶ (M])</button>
+            <span class="key-hint">('o','p')</span>
+        </div>
+    </div>
+    <div class="main-content" id="mainContent"></div>
+<!-- partial -->
+  <script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+  <script src="config.js"></script>
+  <script src="template_data.js"></script>
+  <script>
+
+
+// Store notes in memory
+const notes = {};
+
+// Initialize notes from templates
+function initializeNotes() {
+    for (const [key, template] of Object.entries(templates)) {
+        if (template.notes) {
+            notes[key] = template.notes;
+        }
+    }
+}
+
+// Keep track of current active index and current link number
+let currentIndex = 0;
+let currentLinkNumber = 1;
+let sortedEntries = [];
+
+function parseContent(content) {
+    // Handle both string content and object content (with galleries)
+    let textContent = content;
+    if (typeof content === 'object' && content.content) {
+        textContent = content.content;
+    }
+    
+    const lines = textContent.split('\n');
+    const sections = [];
+    let currentSection = {
+        type: null,
+        content: []
+    };
+
+    lines.forEach(line => {
+        let trimmedLine = line;  // Keep original spacing
+        
+        // Replace {url} placeholders with actual base URL
+        if (trimmedLine.includes('{url}')) {
+            trimmedLine = trimmedLine.replace(/{url}/g, CONFIG.baseUrl);
+        }
+        
+        if (trimmedLine.includes(',') && (trimmedLine.trim().startsWith('http') || trimmedLine.includes('/'))) {
+            if (currentSection.type === 'text' && currentSection.content.length > 0) {
+                sections.push({ ...currentSection });
+                currentSection = { type: null, content: [] };
+            }
+
+            const [url, title] = trimmedLine.split(',').map(part => part.trim());
+            if (currentSection.type !== 'links') {
+                currentSection = { type: 'links', content: [] };
+            }
+            currentSection.content.push({ url, title });
+        } else {
+            if (currentSection.type === 'links' && currentSection.content.length > 0) {
+                sections.push({ ...currentSection });
+                currentSection = { type: null, content: [] };
+            }
+
+            if (currentSection.type !== 'text') {
+                currentSection = { type: 'text', content: [] };
+            }
+            currentSection.content.push(trimmedLine);
+        }
+    });
+
+    if (currentSection.content.length > 0) {
+        sections.push(currentSection);
+    }
+
+    return sections;
+}
+
+function createSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    
+    // Create array of entries and sort by title
+    sortedEntries = Object.entries(templates)
+        .sort((a, b) => a[1].title.localeCompare(b[1].title));
+
+    sortedEntries.forEach(([key, template], index) => {
+        const item = document.createElement('div');
+        item.className = 'sidebar-item';
+        item.textContent = template.title;
+        item.dataset.index = index;
+        item.onclick = () => {
+            setActiveItem(index);
+        };
+        sidebar.appendChild(item);
+    });
+}
+
+function setActiveItem(index) {
+    currentIndex = index;
+    currentLinkNumber = 1; // Reset link number when changing sidebar item
+    
+    document.querySelectorAll('.sidebar-item').forEach(el => {
+        el.classList.remove('active');
+    });
+    document.querySelector(`[data-index="${index}"]`).classList.add('active');
+    updateContent(sortedEntries[index][0]);
+    
+    // Update link navigation
+    handleLinkNavigation();
+}
+
+function updateContent(key) {
+    const mainContent = document.getElementById('mainContent');
+    const template = templates[key];
+    const sections = parseContent(template.content);
+    
+    // Update link counter in the navigation
+    const linkCounter = document.getElementById('linkCounter');
+    if (linkCounter) {
+        linkCounter.textContent = currentLinkNumber;
+    }
+    
+    let html = `<div class="content-section"><h2>${template.title}</h2>`;
+    
+    // Keep track of the global link number for the page
+    let globalLinkNumber = 1;
+    
+    sections.forEach(section => {
+        if (section.type === 'links') {
+            html += `
+                <div class="link-list">
+                    ${section.content.map((link, index) => {
+                        const linkNum = globalLinkNumber++;
+                        return `
+                        <div class="link-item-container">
+                            <span class="link-number">${linkNum}</span>
+                            <a href="${link.url}" target="_blank" class="link-item ${currentLinkNumber === linkNum ? 'active-link' : ''}">
+                                ${link.title}
+                            </a>
+                        </div>
+                    `}).join('')}
+                </div>
+            `;
+        } else if (section.type === 'text') {
+            // Combine all text content preserving original formatting
+            const textContent = section.content.join('\n');
+            // Process markdown code blocks for syntax highlighting
+            const processedContent = processMarkdownCodeBlocks(textContent);
+            html += `
+                <div class="text-content">${processedContent}</div>
+            `;
+        }
+    });
+    
+    // Add editable textbox with copy button at the end of the content section
+    html += `
+        <div class="editable-section">
+            <textarea 
+                class="content-notes" 
+                placeholder="Add your notes here..."
+                data-section="${key}"
+                rows="10"
+                style="width: 100%; font-family: monospace;"
+            >${notes[key] || ''}</textarea>
+            <button class="copy-button" data-section="${key}">Copy to Clipboard</button>
+        </div>
+    `;
+    
+    html += '</div>';
+    mainContent.innerHTML = html;
+    
+    // Trigger Prism.js syntax highlighting for newly added code blocks
+    if (typeof Prism !== 'undefined') {
+        Prism.highlightAll();
+    }
+    
+    // Add event listener to save textarea content to memory
+    const textarea = mainContent.querySelector('.content-notes');
+    textarea.addEventListener('input', (e) => {
+        notes[key] = e.target.value;
+    });
+    
+    // Add event listener for the copy button
+    const copyButton = mainContent.querySelector('.copy-button');
+    copyButton.addEventListener('click', () => {
+        const textToCopy = notes[key] || '';
+        copyToClipboard(textToCopy, copyButton);
+    });
+}
+
+// Add a function to handle copying to clipboard
+function copyToClipboard(text, button) {
+    // Create a temporary textarea element
+    const tempTextarea = document.createElement('textarea');
+    tempTextarea.value = text;
+    tempTextarea.setAttribute('readonly', '');
+    tempTextarea.style.position = 'absolute';
+    tempTextarea.style.left = '-9999px';
+    document.body.appendChild(tempTextarea);
+    
+    // Select and copy the text
+    tempTextarea.select();
+    document.execCommand('copy');
+    
+    // Remove the temporary element
+    document.body.removeChild(tempTextarea);
+    
+    // Visual feedback that copy succeeded
+    const originalText = button.textContent;
+    button.textContent = 'Copied!';
+    button.classList.add('copied');
+    
+    // Reset button text after a delay
+    setTimeout(() => {
+        button.textContent = originalText;
+        button.classList.remove('copied');
+    }, 2000);
+}
+
+// Get all links from current template
+function getAllLinksFromCurrentTemplate() {
+    const templateKey = sortedEntries[currentIndex][0];
+    const template = templates[templateKey];
+    const sections = parseContent(template.content);
+    
+    const allLinks = [];
+    sections.forEach(section => {
+        if (section.type === 'links') {
+            section.content.forEach(link => {
+                allLinks.push(link);
+            });
+        }
+    });
+    
+    return allLinks;
+}
+
+// Get a flat map of all links with their global numbers
+function getNumberedLinksMap() {
+    const templateKey = sortedEntries[currentIndex][0];
+    const template = templates[templateKey];
+    const sections = parseContent(template.content);
+    
+    const numberedLinks = new Map();
+    let globalLinkNumber = 1;
+    
+    sections.forEach(section => {
+        if (section.type === 'links') {
+            section.content.forEach(link => {
+                numberedLinks.set(globalLinkNumber++, link);
+            });
+        }
+    });
+    
+    return numberedLinks;
+}
+
+// Handle link navigation
+function handleLinkNavigation() {
+    const prevLinkBtn = document.getElementById('prevLink');
+    const nextLinkBtn = document.getElementById('nextLink');
+    const gotoLinkBtn = document.getElementById('gotoLink');
+    const linkCounter = document.getElementById('linkCounter');
+    
+    const numberedLinksMap = getNumberedLinksMap();
+    const maxLinkNumber = numberedLinksMap.size;
+    
+    // Update UI
+    linkCounter.textContent = currentLinkNumber;
+    prevLinkBtn.disabled = currentLinkNumber <= 1;
+    nextLinkBtn.disabled = currentLinkNumber >= maxLinkNumber;
+    
+    // Add event listeners
+    prevLinkBtn.onclick = () => {
+        if (currentLinkNumber > 1) {
+            currentLinkNumber--;
+            linkCounter.textContent = currentLinkNumber;
+            prevLinkBtn.disabled = currentLinkNumber <= 1;
+            nextLinkBtn.disabled = false;
+            const templateKey = sortedEntries[currentIndex][0];
+            updateContent(templateKey);
+        }
+    };
+    
+    nextLinkBtn.onclick = () => {
+        if (currentLinkNumber < maxLinkNumber) {
+            currentLinkNumber++;
+            linkCounter.textContent = currentLinkNumber;
+            nextLinkBtn.disabled = currentLinkNumber >= maxLinkNumber;
+            prevLinkBtn.disabled = false;
+            const templateKey = sortedEntries[currentIndex][0];
+            updateContent(templateKey);
+        }
+    };
+    
+    gotoLinkBtn.onclick = () => {
+        if (numberedLinksMap.size > 0 && numberedLinksMap.has(currentLinkNumber)) {
+            window.open(numberedLinksMap.get(currentLinkNumber).url, '_blank');
+        }
+    };
+}
+
+function gotoLinkByNumber(linkNumber) {
+    const numberedLinksMap = getNumberedLinksMap();
+    const maxLinkNumber = numberedLinksMap.size;
+    
+    if (linkNumber >= 1 && linkNumber <= maxLinkNumber && numberedLinksMap.has(linkNumber)) {
+        // Just open the link directly - don't update UI unnecessarily
+        window.open(numberedLinksMap.get(linkNumber).url, '_blank');
+        
+        // Only update the current link number and UI if you want to track position
+        currentLinkNumber = linkNumber;
+        const templateKey = sortedEntries[currentIndex][0];
+        updateContent(templateKey);
+    }
+}
+
+// Navigate to previous sidebar item
+function navigateToPrevSidebar() {
+    if (currentIndex > 0) {
+        setActiveItem(currentIndex - 1);
+    } else {
+        // Wrap around to the last item
+        setActiveItem(sortedEntries.length - 1);
+    }
+}
+
+// Navigate to next sidebar item
+function navigateToNextSidebar() {
+    if (currentIndex < sortedEntries.length - 1) {
+        setActiveItem(currentIndex + 1);
+    } else {
+        // Wrap around to the first item
+        setActiveItem(0);
+    }
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    initializeNotes(); // Initialize notes from templates
+    createSidebar();
+    setActiveItem(0);
+    
+    // Initialize link navigation
+    handleLinkNavigation();
+    
+    // Add sidebar navigation buttons
+    document.getElementById('prevSidebar').addEventListener('click', navigateToPrevSidebar);
+    document.getElementById('nextSidebar').addEventListener('click', navigateToNextSidebar);
+    
+    // Add number input functionality
+    const linkInput = document.getElementById('linkInput');
+    const gotoNumberBtn = document.getElementById('gotoNumberLink');
+    
+    gotoNumberBtn.addEventListener('click', () => {
+        const linkNumber = parseInt(linkInput.value);
+        if (!isNaN(linkNumber)) {
+            gotoLinkByNumber(linkNumber);
+            linkInput.value = ''; // Clear input after use
+        }
+    });
+    
+    // Allow Enter key in input to trigger go
+    linkInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            gotoNumberBtn.click();
+        }
+    });
+    
+    // Add keyboard navigation
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === '-') {
+            document.getElementById('prevLink').click();
+        } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === '=') {
+            document.getElementById('nextLink').click();
+        } else if (e.key === 'Enter' || e.key === 'l' || e.key === 'L') {
+            // Don't trigger if the linkInput is focused
+            if (document.activeElement !== document.getElementById('linkInput')) {
+                document.getElementById('gotoLink').click();
+            }
+        } else if (e.key === 'z' || e.key === 'Z' || e.key === '[') {
+            document.getElementById('prevSidebar').click();
+        } else if (e.key === 'm' || e.key === 'M' || e.key === ']') {
+            document.getElementById('nextSidebar').click();
+        } else if (e.key === 'o' || e.key === 'O') {
+            // Page up on right pane
+            const mainContent = document.getElementById('mainContent');
+            mainContent.scrollBy(0, -window.innerHeight * 0.8);
+        } else if (e.key === 'p' || e.key === 'P') {
+            // Page down on right pane
+            const mainContent = document.getElementById('mainContent');
+            mainContent.scrollBy(0, window.innerHeight * 0.8);
+        } else if (e.key === 'Escape') {
+            document.getElementById('linkInput').focus();
+        }
+    });
+});
+
+// Function to process markdown code blocks
+function processMarkdownCodeBlocks(text) {
+    // Regex to match code blocks with language specification
+    const codeBlockRegex = /```(\w+)?\n?([\s\S]*?)```/g;
+    
+    return text.replace(codeBlockRegex, (match, language, code) => {
+        const lang = language || 'text';
+        const escapedCode = code.trim()
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+        
+        return `<pre><code class="language-${lang}">${escapedCode}</code></pre>`;
+    });
+}
+
+// Add some basic CSS for code formatting in textareas
+const style = document.createElement('style');
+style.textContent = `
+.content-notes {
+    white-space: pre;
+    font-family: monospace;
+    font-size: 14px;
+    tab-size: 4;
+    overflow-x: auto;
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+`;
+document.head.appendChild(style);
+  </script>
+
+<!-- Prism.js JavaScript for syntax highlighting -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+
+</body>
+</html>
