@@ -94,7 +94,7 @@
 
         .image-counter {
             position: absolute;
-            bottom: 20px;
+            top: 20px;
             left: 50%;
             transform: translateX(-50%);
             background: rgba(0,0,0,0.7);
@@ -314,7 +314,13 @@
         // Update main display
         function updateDisplay() {
             mainImage.src = images[currentIndex];
-            imageCounter.textContent = `${currentIndex + 1} / ${images.length}`;
+            
+            // Get image name from imagesInfo or fallback to filename from path
+            const imageName = imagesInfo && imagesInfo[currentIndex] 
+                ? imagesInfo[currentIndex].title 
+                : images[currentIndex].split('/').pop().split('.')[0];
+            
+            imageCounter.textContent = `${currentIndex + 1} / ${images.length} - ${imageName}`;
             
             // Update active thumbnail
             const thumbnails = document.querySelectorAll('.thumbnail');
