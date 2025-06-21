@@ -66,6 +66,74 @@ def detect_local_galleries(content, base_dir):
     
     return gallery_info
 
+def parse_markdown_tables(content):
+    """Parse markdown tables and convert them to HTML tables."""
+    lines = content.split('\n')
+    processed_lines = []
+    i = 0
+    
+    while i < len(lines):
+        line = lines[i].strip()
+        
+        # Check if this line looks like a table header (contains |)
+        if '|' in line and line.count('|') >= 2:
+            # Look for the separator line (next line with dashes and |)
+            if i + 1 < len(lines) and re.match(r'^[\s\|\-\:]+$', lines[i + 1].strip()):
+                # We found a table!
+                table_lines = [line]
+                table_lines.append(lines[i + 1])  # separator line
+                i += 2
+                
+                # Collect all subsequent table rows
+                while i < len(lines) and '|' in lines[i].strip() and lines[i].strip():
+                    table_lines.append(lines[i].strip())
+                    i += 1
+                
+                # Convert to HTML table
+                html_table = convert_markdown_table_to_html(table_lines)
+                processed_lines.append(html_table)
+                continue
+        
+        processed_lines.append(lines[i])
+        i += 1
+    
+    return '\n'.join(processed_lines)
+
+def convert_markdown_table_to_html(table_lines):
+    """Convert markdown table lines to HTML table."""
+    if len(table_lines) < 3:  # Need at least header, separator, and one data row
+        return '\n'.join(table_lines)  # Return as-is if not a valid table
+    
+    # Parse header
+    header_line = table_lines[0].strip()
+    headers = [cell.strip() for cell in header_line.split('|') if cell.strip()]
+    
+    # Parse data rows (skip separator line)
+    data_rows = []
+    for line in table_lines[2:]:
+        if line.strip():
+            cells = [cell.strip() for cell in line.split('|') if cell.strip()]
+            if cells:  # Only add non-empty rows
+                data_rows.append(cells)
+    
+    # Generate HTML
+    html_content = '<table class="markdown-table">\n'
+    html_content += '  <thead>\n    <tr>\n'
+    for header in headers:
+        html_content += f'      <th>{html.escape(header)}</th>\n'
+    html_content += '    </tr>\n  </thead>\n'
+    
+    html_content += '  <tbody>\n'
+    for row in data_rows:
+        html_content += '    <tr>\n'
+        for cell in row:
+            html_content += f'      <td>{html.escape(cell)}</td>\n'
+        html_content += '    </tr>\n'
+    html_content += '  </tbody>\n'
+    html_content += '</table>'
+    
+    return html_content
+
 def parse_code_blocks(content):
     """Parse markdown-style code blocks and convert them to HTML with syntax highlighting classes."""
     # Pattern to match code blocks with language specifier
@@ -95,6 +163,9 @@ def process_txt_file(file_path, base_dir=None):
     gallery_info = []
     if base_dir:
         gallery_info = detect_local_galleries(content, base_dir)
+    
+    # Parse markdown tables first
+    content = parse_markdown_tables(content)
     
     # Parse code blocks for syntax highlighting
     content = parse_code_blocks(content)

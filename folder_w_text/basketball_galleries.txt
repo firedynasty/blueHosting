@@ -1,5 +1,5 @@
-{url}/content/dribbling/spin_move1_img/index.html, Spin
-{url}/content/player_videos/index.html, Player videos
+{url}/content/dribbling/spin_move1_img/index.html; Spin
+{url}/content/player_videos/index.html; Player videos
 {url}/index.html
 
 

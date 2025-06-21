@@ -256,7 +256,7 @@
 </head>
 <body>
     <div class="gallery-container">
-        <h1>🎬 Video Gallery</h1>
+        <h1 style="display: none;">🎬 Video Gallery</h1>
         
         <div class="main-gallery">
             <div class="video-display">
@@ -341,7 +341,7 @@
             const currentVideo = videos[currentIndex];
             mainVideo.src = currentVideo.src;
             videoTitle.textContent = currentVideo.title;
-            videoCounter.textContent = `${currentIndex + 1} / ${videos.length}`;
+            videoCounter.textContent = `${currentIndex + 1} / ${videos.length} - ${currentVideo.title}`;
             
             // Update active thumbnail
             const thumbnails = document.querySelectorAll('.thumbnail');
@@ -412,9 +412,11 @@
         document.addEventListener('keydown', (e) => {
             switch(e.key) {
                 case 'ArrowLeft':
+                case '[':
                     prevVideo();
                     break;
                 case 'ArrowRight':
+                case ']':
                     nextVideo();
                     break;
                 case ' ':

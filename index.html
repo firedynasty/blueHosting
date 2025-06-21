@@ -278,6 +278,34 @@ pre code {
     padding: 0;
     margin: 0;
 }
+
+/* Markdown table styles */
+.markdown-table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1em 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.markdown-table th,
+.markdown-table td {
+    border: 1px solid #ddd;
+    padding: 8px 12px;
+    text-align: left;
+}
+
+.markdown-table th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+}
+
+.markdown-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.markdown-table tr:hover {
+    background-color: #f0f0f0;
+}
 </style>
 
 <!-- Prism.js CSS for syntax highlighting -->
@@ -350,6 +378,55 @@ function parseContent(content) {
         textContent = content.content;
     }
     
+    // If content contains HTML tables, we need special handling to avoid parsing table cells as links
+    if (textContent.includes('<table class="markdown-table">')) {
+        // Extract standalone links that are on their own lines and not inside HTML
+        const lines = textContent.split('\n');
+        const sections = [];
+        let currentSection = { type: 'text', content: [] };
+        
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i];
+            
+            // Replace {url} placeholders
+            if (line.includes('{url}')) {
+                line = line.replace(/{url}/g, CONFIG.baseUrl);
+            }
+            
+            // Check if this is a standalone link line (not inside HTML)
+            const trimmedLine = line.trim();
+            if (trimmedLine.includes(';') && 
+                (trimmedLine.startsWith('http') || (trimmedLine.includes('/') && !trimmedLine.includes('<'))) &&
+                !trimmedLine.includes('<') && !trimmedLine.includes('>')) {
+                
+                // Finish current text section if it has content
+                if (currentSection.type === 'text' && currentSection.content.length > 0) {
+                    sections.push({ ...currentSection });
+                }
+                
+                // Create link section
+                const [url, title] = trimmedLine.split(';').map(part => part.trim());
+                sections.push({
+                    type: 'links',
+                    content: [{ url, title }]
+                });
+                
+                // Start new text section
+                currentSection = { type: 'text', content: [] };
+            } else {
+                currentSection.content.push(line);
+            }
+        }
+        
+        // Add final text section if it has content
+        if (currentSection.content.length > 0) {
+            sections.push(currentSection);
+        }
+        
+        return sections;
+    }
+    
+    // Original parsing logic for content without HTML tables
     const lines = textContent.split('\n');
     const sections = [];
     let currentSection = {
@@ -365,13 +442,16 @@ function parseContent(content) {
             trimmedLine = trimmedLine.replace(/{url}/g, CONFIG.baseUrl);
         }
         
-        if (trimmedLine.includes(',') && (trimmedLine.trim().startsWith('http') || trimmedLine.includes('/'))) {
+        // Check if this looks like a link (has semicolon and starts with http or contains /)
+        if (trimmedLine.includes(';') && 
+            (trimmedLine.trim().startsWith('http') || trimmedLine.includes('/'))) {
+            
             if (currentSection.type === 'text' && currentSection.content.length > 0) {
                 sections.push({ ...currentSection });
                 currentSection = { type: null, content: [] };
             }
 
-            const [url, title] = trimmedLine.split(',').map(part => part.trim());
+            const [url, title] = trimmedLine.split(';').map(part => part.trim());
             if (currentSection.type !== 'links') {
                 currentSection = { type: 'links', content: [] };
             }
@@ -464,11 +544,19 @@ function updateContent(key) {
         } else if (section.type === 'text') {
             // Combine all text content preserving original formatting
             const textContent = section.content.join('\n');
-            // Process markdown code blocks for syntax highlighting
-            const processedContent = processMarkdownCodeBlocks(textContent);
-            html += `
-                <div class="text-content">${processedContent}</div>
-            `;
+            // Check if content already contains HTML (like tables)
+            if (textContent.includes('<table class="markdown-table">')) {
+                // Content already has HTML tables, render as is but with mixed content handling
+                html += `
+                    <div class="text-content">${textContent}</div>
+                `;
+            } else {
+                // Process markdown code blocks for syntax highlighting
+                const processedContent = processMarkdownCodeBlocks(textContent);
+                html += `
+                    <div class="text-content">${processedContent}</div>
+                `;
+            }
         }
     });
     
