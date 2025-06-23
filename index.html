@@ -138,6 +138,66 @@
     color: white;
 }
 
+.paste-button {
+    margin-top: 10px;
+    padding: 8px 16px;
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.paste-button:hover {
+    background-color: #e0e0e0;
+}
+
+.paste-button.pasted {
+    background-color: #2196F3;
+    color: white;
+}
+
+.read-button {
+    margin-top: 10px;
+    padding: 8px 16px;
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.read-button:hover {
+    background-color: #e0e0e0;
+}
+
+.read-button.reading {
+    background-color: #FF9800;
+    color: white;
+}
+
+.replace-pane-button {
+    margin-top: 10px;
+    padding: 8px 16px;
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.replace-pane-button:hover {
+    background-color: #e0e0e0;
+}
+
+.replace-pane-button.replacing {
+    background-color: #9C27B0;
+    color: white;
+}
+
 /* Link navigation styles */
 .link-navigation {
     background-color: #f0f0f0;
@@ -306,6 +366,57 @@ pre code {
 .markdown-table tr:hover {
     background-color: #f0f0f0;
 }
+
+/* Delimited line styles */
+.delimited-line {
+    display: block;
+    padding: 2px 4px;
+    margin: 1px 0;
+    border-radius: 2px;
+    cursor: text;
+    transition: background-color 0.1s ease;
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+}
+
+.delimited-line:hover {
+    background-color: #e8f4fd;
+}
+
+.delimited-line:empty {
+    min-height: 1.2em;
+}
+
+.delimited-content .text-content {
+    font-family: 'Monaco', 'Consolas', monospace;
+    line-height: 1.4;
+}
+
+.delimited-content pre code {
+    display: block;
+}
+
+.delimited-content pre .delimited-line {
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 14px;
+}
+
+.delimited-line.selected {
+    background-color: #4a90e2;
+    color: white;
+    font-weight: bold;
+}
+
+.delimited-line.selected:hover {
+    background-color: #3a80d2;
+}
+
+.delimited-line:hover {
+    background-color: #e8f4fd;
+    cursor: pointer;
+}
 </style>
 
 <!-- Prism.js CSS for syntax highlighting -->
@@ -319,16 +430,36 @@ pre code {
 <div class="main-container">
     <div class="link-navigation">
         <div class="link-controls">
-            <button class="nav-button" id="prevSidebar">◀ (Z[)</button>
+            <button class="nav-button" id="prevSidebar">◀ ([)</button>
             <button class="nav-button" id="prevLink">- (-)</button>
             <span class="link-counter" id="linkCounter">1</span>
             <button class="nav-button" id="nextLink">+ (=)</button>
-            <button class="goto-link" id="gotoLink">Go to Link (L)</button>
+            <button class="goto-link" id="gotoLink">Go to Link (\)</button>
             <input type="number" class="link-input" id="linkInput" placeholder="#" min="1">
             <span class="key-hint">(ESC)</span>
             <button class="goto-number-link" id="gotoNumberLink">Go</button>
-            <button class="nav-button" id="nextSidebar">▶ (M])</button>
+            <button class="nav-button" id="nextSidebar">▶ (])</button>
             <span class="key-hint">('o','p')</span>
+            <button class="nav-button" id="delimitButton">Delimit(`)</button>
+            
+            <div class="tts-controls" style="margin-left: 20px; display: inline-flex; align-items: center; gap: 10px;">
+                <label style="font-size: 12px;">Language:</label>
+                <select id="languageSelect" style="padding: 4px; font-size: 12px;">
+                    <option value="zh-HK" selected="">Cantonese</option>
+                    <option value="en-US">English</option>
+                    <option value="fr-FR">French</option>
+                    <option value="es-ES">Spanish</option>
+                    <option value="zh-CN">Mandarin</option>
+                    <option value="ko-KR">Korean</option>
+                </select>
+                
+                <label style="font-size: 12px;">Speed:</label>
+                <select id="rateSelect" style="padding: 4px; font-size: 12px;">
+                    <option value="1">1x</option>
+                    <option value="1.5">1.5x</option>
+                    <option value="0.7" selected="">0.7x</option>
+                </select>
+            </div>
         </div>
     </div>
     <div class="main-content" id="mainContent"></div>
@@ -370,6 +501,10 @@ function initializeNotes() {
 let currentIndex = 0;
 let currentLinkNumber = 1;
 let sortedEntries = [];
+let isDelimitMode = false;
+let currentLineIndex = 0;
+let totalLines = 0;
+let hoveredLineText = null;
 
 function parseContent(content) {
     // Handle both string content and object content (with galleries)
@@ -544,23 +679,33 @@ function updateContent(key) {
         } else if (section.type === 'text') {
             // Combine all text content preserving original formatting
             const textContent = section.content.join('\n');
-            // Check if content already contains HTML (like tables)
-            if (textContent.includes('<table class="markdown-table">')) {
-                // Content already has HTML tables, render as is but with mixed content handling
+            
+            if (isDelimitMode) {
+                // In delimit mode, wrap each line in selectable spans
+                const delimitedContent = delimitContent(textContent);
                 html += `
-                    <div class="text-content">${textContent}</div>
+                    <div class="text-content delimited-content" onclick="handleDelimitedClick(event)" onmouseover="handleDelimitedHover(event)" onmouseout="handleDelimitedHoverOut(event)">${delimitedContent}</div>
                 `;
             } else {
-                // Process markdown code blocks for syntax highlighting
-                const processedContent = processMarkdownCodeBlocks(textContent);
-                html += `
-                    <div class="text-content">${processedContent}</div>
-                `;
+                // Normal mode
+                // Check if content already contains HTML (like tables)
+                if (textContent.includes('<table class="markdown-table">')) {
+                    // Content already has HTML tables, render as is but with mixed content handling
+                    html += `
+                        <div class="text-content">${textContent}</div>
+                    `;
+                } else {
+                    // Process markdown code blocks for syntax highlighting
+                    const processedContent = processMarkdownCodeBlocks(textContent);
+                    html += `
+                        <div class="text-content">${processedContent}</div>
+                    `;
+                }
             }
         }
     });
     
-    // Add editable textbox with copy button at the end of the content section
+    // Add editable textbox with copy and paste buttons at the end of the content section
     html += `
         <div class="editable-section">
             <textarea 
@@ -570,7 +715,12 @@ function updateContent(key) {
                 rows="10"
                 style="width: 100%; font-family: monospace;"
             >${notes[key] || ''}</textarea>
-            <button class="copy-button" data-section="${key}">Copy to Clipboard</button>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button class="copy-button" data-section="${key}">Copy to Clipboard</button>
+                <button class="paste-button" data-section="${key}">Paste from Clipboard</button>
+                <button class="read-button" data-section="${key}">Read</button>
+                <button class="replace-pane-button" data-section="${key}">Replace Pane</button>
+            </div>
         </div>
     `;
     
@@ -594,6 +744,99 @@ function updateContent(key) {
         const textToCopy = notes[key] || '';
         copyToClipboard(textToCopy, copyButton);
     });
+    
+    // Add event listener for the paste button
+    const pasteButton = mainContent.querySelector('.paste-button');
+    pasteButton.addEventListener('click', async () => {
+        try {
+            const clipboardText = await navigator.clipboard.readText();
+            const textarea = mainContent.querySelector('.content-notes');
+            textarea.value = clipboardText;
+            notes[key] = clipboardText;
+            
+            // Visual feedback that paste succeeded
+            const originalText = pasteButton.textContent;
+            pasteButton.textContent = 'Pasted!';
+            pasteButton.classList.add('pasted');
+            
+            // Reset button text after a delay
+            setTimeout(() => {
+                pasteButton.textContent = originalText;
+                pasteButton.classList.remove('pasted');
+            }, 2000);
+        } catch (err) {
+            console.error('Failed to read clipboard contents: ', err);
+            // Fallback visual feedback for failed paste
+            const originalText = pasteButton.textContent;
+            pasteButton.textContent = 'Paste Failed';
+            setTimeout(() => {
+                pasteButton.textContent = originalText;
+            }, 2000);
+        }
+    });
+    
+    // Add event listener for the read button
+    const readButton = mainContent.querySelector('.read-button');
+    readButton.addEventListener('click', () => {
+        const textarea = mainContent.querySelector('.content-notes');
+        const textToRead = textarea.value;
+        
+        if (textToRead && textToRead.trim() !== '') {
+            // Visual feedback that reading started
+            const originalText = readButton.textContent;
+            readButton.textContent = 'Reading...';
+            readButton.classList.add('reading');
+            
+            // Speak the textarea content
+            speakText(textToRead);
+            
+            // Reset button after a short delay (TTS is async, so we don't wait for completion)
+            setTimeout(() => {
+                readButton.textContent = originalText;
+                readButton.classList.remove('reading');
+            }, 2000);
+        }
+    });
+    
+    // Add event listener for the replace pane button
+    const replacePaneButton = mainContent.querySelector('.replace-pane-button');
+    replacePaneButton.addEventListener('click', () => {
+        const textarea = mainContent.querySelector('.content-notes');
+        const textToReplace = textarea.value;
+        
+        if (textToReplace && textToReplace.trim() !== '') {
+            // Visual feedback that replacement started
+            const originalText = replacePaneButton.textContent;
+            replacePaneButton.textContent = 'Replacing...';
+            replacePaneButton.classList.add('replacing');
+            
+            // Replace the current template content with textarea content
+            replaceCurrentPaneContent(key, textToReplace);
+            
+            // Reset button after a delay
+            setTimeout(() => {
+                replacePaneButton.textContent = originalText;
+                replacePaneButton.classList.remove('replacing');
+            }, 1000);
+        }
+    });
+}
+
+// Function to replace current pane content with textarea content
+function replaceCurrentPaneContent(key, newContent) {
+    // Update the template content in memory
+    if (templates[key]) {
+        templates[key].content = newContent;
+        
+        // Reset link navigation to first link
+        currentLinkNumber = 1;
+        
+        // Refresh the current content display
+        updateContent(key);
+        
+        // Update link navigation
+        handleLinkNavigation();
+    }
 }
 
 // Add a function to handle copying to clipboard
@@ -774,20 +1017,43 @@ function navigateToNextSidebar() {
         }
     });
     
+    // Add delimit button functionality
+    const delimitButton = document.getElementById('delimitButton');
+    delimitButton.addEventListener('click', () => {
+        isDelimitMode = !isDelimitMode;
+        delimitButton.textContent = isDelimitMode ? 'Normal' : 'Delimit';
+        delimitButton.style.backgroundColor = isDelimitMode ? '#4CAF50' : '';
+        delimitButton.style.color = isDelimitMode ? 'white' : '';
+        
+        // Reset line selection when entering delimit mode
+        if (isDelimitMode) {
+            currentLineIndex = 0;
+        }
+        
+        // Refresh current content
+        const templateKey = sortedEntries[currentIndex][0];
+        updateContent(templateKey);
+        
+        // Highlight first line if in delimit mode
+        if (isDelimitMode) {
+            setTimeout(() => highlightSelectedLine(), 100);
+        }
+    });
+    
     // Add keyboard navigation
     document.addEventListener('keydown', (e) => {
         if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === '-') {
             document.getElementById('prevLink').click();
         } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === '=') {
             document.getElementById('nextLink').click();
-        } else if (e.key === 'Enter' || e.key === 'l' || e.key === 'L') {
+        } else if (e.key === '\\') {
             // Don't trigger if the linkInput is focused
             if (document.activeElement !== document.getElementById('linkInput')) {
                 document.getElementById('gotoLink').click();
             }
-        } else if (e.key === 'z' || e.key === 'Z' || e.key === '[') {
+        } else if (e.key === '[') {
             document.getElementById('prevSidebar').click();
-        } else if (e.key === 'm' || e.key === 'M' || e.key === ']') {
+        } else if (e.key === ']') {
             document.getElementById('nextSidebar').click();
         } else if (e.key === 'o' || e.key === 'O') {
             // Page up on right pane
@@ -799,10 +1065,215 @@ function navigateToNextSidebar() {
             mainContent.scrollBy(0, window.innerHeight * 0.8);
         } else if (e.key === 'Escape') {
             document.getElementById('linkInput').focus();
+        } else if (e.key === '`') {
+            document.getElementById('delimitButton').click();
         }
     });
 
 }  // End of initializeApp function
+
+// Function to delimit content by wrapping each line in a selectable span
+function delimitContent(content) {
+    // Split content by newlines and wrap each line
+    const lines = content.split('\n');
+    totalLines = lines.length;
+    return lines.map((line, index) => {
+        // Handle empty lines
+        if (line.trim() === '') {
+            return `<span class="delimited-line" data-line-index="${index}">&nbsp;</span>`;
+        }
+        // Escape HTML entities to prevent XSS
+        const escapedLine = line
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+        return `<span class="delimited-line" data-line-index="${index}">${escapedLine}</span>`;
+    }).join('\n');
+}
+
+// Function to highlight selected line in delimit mode
+function highlightSelectedLine() {
+    if (!isDelimitMode) return;
+    
+    // Remove previous selection
+    document.querySelectorAll('.delimited-line.selected').forEach(el => {
+        el.classList.remove('selected');
+    });
+    
+    // Highlight current line
+    const selectedLine = document.querySelector(`[data-line-index="${currentLineIndex}"]`);
+    if (selectedLine) {
+        selectedLine.classList.add('selected');
+        selectedLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+
+// Function to navigate to previous line in delimit mode
+function navigatePrevLine() {
+    if (currentLineIndex > 0) {
+        currentLineIndex--;
+        highlightSelectedLine();
+    }
+}
+
+// Function to navigate to next line in delimit mode  
+function navigateNextLine() {
+    if (currentLineIndex < totalLines - 1) {
+        currentLineIndex++;
+        highlightSelectedLine();
+    }
+}
+
+// Handle clicks on delimited lines for TTS
+function handleDelimitedClick(event) {
+    if (event.target.classList.contains('delimited-line')) {
+        const lineText = event.target.textContent;
+        if (lineText && lineText.trim() !== '') {
+            speakText(lineText);
+        }
+    }
+}
+
+// Handle hover on delimited lines to track hovered text
+function handleDelimitedHover(event) {
+    if (event.target.classList.contains('delimited-line')) {
+        hoveredLineText = event.target.textContent;
+    }
+}
+
+// Handle hover out on delimited lines to clear hovered text
+function handleDelimitedHoverOut(event) {
+    hoveredLineText = null;
+}
+
+// Text-to-speech function
+function speakText(text, forceLanguage = null) {
+    if (!text) return;
+    
+    // Cancel any ongoing speech
+    window.speechSynthesis.cancel();
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    
+    // Set language
+    const languageSelect = document.getElementById('languageSelect');
+    const selectedLanguage = forceLanguage || languageSelect.value;
+    utterance.lang = selectedLanguage;
+    
+    // Set rate
+    const rateSelect = document.getElementById('rateSelect');
+    utterance.rate = parseFloat(rateSelect.value);
+    
+    // Clean text (remove parentheses)
+    utterance.text = text.replace(/\([^)]*\)/g, '').trim();
+    
+    // Advanced voice selection logic
+    const voices = window.speechSynthesis.getVoices();
+    
+    // Handle English voices
+    if (selectedLanguage.includes('en-')) {
+        // Try to find premium/enhanced English voices first
+        let englishVoice = voices.find(voice =>
+            (voice.lang.includes('en-') && voice.name.includes('Enhanced')) ||
+            (voice.lang.includes('en-') && voice.name.includes('Premium'))
+        );
+
+        // If no enhanced voice, try Google voices
+        if (!englishVoice) {
+            englishVoice = voices.find(voice =>
+                voice.lang.includes('en-') && voice.name.includes('Google')
+            );
+        }
+
+        // If no Google voice, try specific known high-quality voices
+        if (!englishVoice) {
+            const qualityVoiceNames = ['Daniel', 'Samantha', 'Alex', 'Karen', 'Microsoft David'];
+            for (const name of qualityVoiceNames) {
+                const foundVoice = voices.find(voice =>
+                    voice.lang.includes('en-') && voice.name.includes(name)
+                );
+                if (foundVoice) {
+                    englishVoice = foundVoice;
+                    break;
+                }
+            }
+        }
+
+        // If still no voice, just get any English voice
+        if (!englishVoice) {
+            englishVoice = voices.find(voice => voice.lang.includes('en-'));
+        }
+
+        if (englishVoice) {
+            console.log(`Using English voice: ${englishVoice.name} (${englishVoice.lang})`);
+            utterance.voice = englishVoice;
+        }
+    }
+    // Handle Chinese voices (Cantonese and Mandarin)
+    else if (selectedLanguage === 'zh-CN' || selectedLanguage === 'zh-HK') {
+        // For Mandarin (zh-CN)
+        if (selectedLanguage === 'zh-CN') {
+            // Try to find Google Chinese voice first
+            const chineseVoice = voices.find(voice => 
+                voice.name.includes('Google') && voice.lang.includes('zh-CN'));
+            if (chineseVoice) {
+                console.log(`Using Mandarin voice: ${chineseVoice.name} (${chineseVoice.lang})`);
+                utterance.voice = chineseVoice;
+            } else {
+                // Fallback to any zh-CN voice
+                const fallbackVoice = voices.find(voice => voice.lang.includes('zh-CN'));
+                if (fallbackVoice) {
+                    console.log(`Using Mandarin fallback voice: ${fallbackVoice.name} (${fallbackVoice.lang})`);
+                    utterance.voice = fallbackVoice;
+                }
+            }
+        }
+        // For Cantonese (zh-HK)
+        else if (selectedLanguage === 'zh-HK') {
+            // Try to find a Cantonese voice
+            const cantoneseVoice = voices.find(voice => 
+                voice.lang.includes('zh-HK') || voice.name.includes('Hong Kong'));
+            if (cantoneseVoice) {
+                console.log(`Using Cantonese voice: ${cantoneseVoice.name} (${cantoneseVoice.lang})`);
+                utterance.voice = cantoneseVoice;
+            } else {
+                console.log('No Cantonese voice found, using default');
+                // Log available voices for debugging
+                console.log('Available voices:', voices.map(v => `${v.name} (${v.lang})`));
+            }
+        }
+    }
+    // Handle Korean voice selection
+    else if (selectedLanguage === 'ko-KR') {
+        const koreanVoice = voices.find(voice => voice.name === 'Google 한국의');
+        if (koreanVoice) {
+            console.log(`Using Korean voice: ${koreanVoice.name} (${koreanVoice.lang})`);
+            utterance.voice = koreanVoice;
+        } else {
+            // Fallback to any Korean voice
+            const fallbackVoice = voices.find(voice => voice.lang.includes('ko-'));
+            if (fallbackVoice) {
+                console.log(`Using Korean fallback voice: ${fallbackVoice.name} (${fallbackVoice.lang})`);
+                utterance.voice = fallbackVoice;
+            }
+        }
+    }
+    // Handle other languages (French, Spanish)
+    else {
+        const preferredVoice = voices.find(voice => 
+            voice.lang.startsWith(selectedLanguage.split('-')[0])
+        );
+        
+        if (preferredVoice) {
+            console.log(`Using voice: ${preferredVoice.name} (${preferredVoice.lang})`);
+            utterance.voice = preferredVoice;
+        }
+    }
+    
+    window.speechSynthesis.speak(utterance);
+}
 
 // Function to process markdown code blocks
 function processMarkdownCodeBlocks(text) {

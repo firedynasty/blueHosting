@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Gallery</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a1a;
+            min-height: 100vh;
+            color: white;
+            margin: 0;
+            padding: 0;
+        }
+
+        .gallery-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1 {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+            font-size: 2rem;
+            font-weight: 300;
+            color: #f0f0f0;
+        }
+
+        .main-gallery {
+            position: relative;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 0 20px 20px 20px;
+        }
+
+        .image-display {
+            position: relative;
+            width: 100%;
+            flex: 1;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .main-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.6);
+            border: none;
+            color: white;
+            font-size: 2rem;
+            padding: 15px 20px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .nav-btn:hover {
+            background: rgba(0,0,0,0.8);
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        .prev-btn {
+            left: 20px;
+        }
+
+        .next-btn {
+            right: 20px;
+        }
+
+        .image-counter {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 1rem;
+            z-index: 10;
+        }
+
+        .thumbnail-container {
+            display: none;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 15px 0;
+            scroll-behavior: smooth;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            margin: 0 -20px;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+
+        .thumbnail-container::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .thumbnail-container::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+        }
+
+        .thumbnail-container::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 3px;
+        }
+
+        .thumbnail {
+            min-width: 100px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            opacity: 0.7;
+        }
+
+        .thumbnail:hover {
+            transform: scale(1.05);
+            opacity: 1;
+            border-color: rgba(255,255,255,0.4);
+        }
+
+        .thumbnail.active {
+            border-color: #fff;
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .fullscreen-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.6);
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .fullscreen-btn:hover {
+            background: rgba(0,0,0,0.8);
+        }
+
+        .fullscreen-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .fullscreen-overlay.active {
+            display: flex;
+        }
+
+        .fullscreen-image {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 3rem;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        .instructions {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .gallery-container {
+                padding: 0;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+                margin: 15px 0;
+            }
+
+            .main-gallery {
+                padding: 0 10px 10px 10px;
+            }
+
+            .nav-btn {
+                font-size: 1.5rem;
+                padding: 12px 15px;
+            }
+
+            .prev-btn {
+                left: 10px;
+            }
+
+            .next-btn {
+                right: 10px;
+            }
+
+            .thumbnail {
+                min-width: 80px;
+                height: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="gallery-container">
+        <h1>✨ My Image Gallery</h1>
+        
+        <div class="main-gallery">
+            <div class="image-display">
+                <img id="mainImage" class="main-image" src="https://picsum.photos/800/500?random=1" alt="Gallery Image">
+                <button class="nav-btn prev-btn" id="prevBtn">‹</button>
+                <button class="nav-btn next-btn" id="nextBtn">›</button>
+                <div class="image-counter" id="imageCounter">1 / 8</div>
+                <button class="fullscreen-btn" id="fullscreenBtn">⛶</button>
+            </div>
+            
+            <div class="thumbnail-container" id="thumbnailContainer">
+                <!-- Thumbnails will be generated by JavaScript -->
+            </div>
+            
+            <div class="instructions">
+                Use arrow keys, click buttons, or tap thumbnails to navigate • Click ⛶ for fullscreen
+            </div>
+        </div>
+    </div>
+
+    <div class="fullscreen-overlay" id="fullscreenOverlay">
+        <button class="close-btn" id="closeBtn">×</button>
+        <img id="fullscreenImage" class="fullscreen-image" src="" alt="Fullscreen Image">
+    </div>
+
+    <script src="gallery_images.js"></script>
+    <script>
+
+        let currentIndex = 0;
+        
+        // DOM elements
+        const mainImage = document.getElementById('mainImage');
+        const imageCounter = document.getElementById('imageCounter');
+        const thumbnailContainer = document.getElementById('thumbnailContainer');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const fullscreenOverlay = document.getElementById('fullscreenOverlay');
+        const fullscreenImage = document.getElementById('fullscreenImage');
+        const closeBtn = document.getElementById('closeBtn');
+
+        // Initialize gallery
+        function initGallery() {
+            generateThumbnails();
+            updateDisplay();
+        }
+
+        // Generate thumbnail images
+        function generateThumbnails() {
+            thumbnailContainer.innerHTML = '';
+            images.forEach((src, index) => {
+                const thumb = document.createElement('img');
+                thumb.src = src;
+                thumb.className = 'thumbnail';
+                thumb.addEventListener('click', () => goToImage(index));
+                thumbnailContainer.appendChild(thumb);
+            });
+        }
+
+        // Update main display
+        function updateDisplay() {
+            mainImage.src = images[currentIndex];
+            
+            // Get image name from imagesInfo or fallback to filename from path
+            const imageName = imagesInfo && imagesInfo[currentIndex] 
+                ? imagesInfo[currentIndex].title 
+                : images[currentIndex].split('/').pop().split('.')[0];
+            
+            imageCounter.textContent = `${currentIndex + 1} / ${images.length} - ${imageName}`;
+            
+            // Update active thumbnail
+            const thumbnails = document.querySelectorAll('.thumbnail');
+            thumbnails.forEach((thumb, index) => {
+                thumb.classList.toggle('active', index === currentIndex);
+            });
+            
+            // Scroll active thumbnail into view
+            const activeThumbnail = thumbnails[currentIndex];
+            if (activeThumbnail) {
+                activeThumbnail.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'nearest',
+                    inline: 'center' 
+                });
+            }
+        }
+
+        // Navigation functions
+        function nextImage() {
+            currentIndex = (currentIndex + 1) % images.length;
+            updateDisplay();
+        }
+
+        function prevImage() {
+            currentIndex = (currentIndex - 1 + images.length) % images.length;
+            updateDisplay();
+        }
+
+        function goToImage(index) {
+            currentIndex = index;
+            updateDisplay();
+        }
+
+        // Fullscreen functions
+        function openFullscreen() {
+            fullscreenImage.src = images[currentIndex];
+            fullscreenOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeFullscreen() {
+            fullscreenOverlay.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Event listeners
+        prevBtn.addEventListener('click', prevImage);
+        nextBtn.addEventListener('click', nextImage);
+        fullscreenBtn.addEventListener('click', openFullscreen);
+        closeBtn.addEventListener('click', closeFullscreen);
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case 'ArrowLeft':
+                case '[':
+                    prevImage();
+                    break;
+                case 'ArrowRight':
+                case ']':
+                    nextImage();
+                    break;
+                case 'Escape':
+                    closeFullscreen();
+                    break;
+                case ' ':
+                    e.preventDefault();
+                    openFullscreen();
+                    break;
+            }
+        });
+
+        // Close fullscreen when clicking overlay
+        fullscreenOverlay.addEventListener('click', (e) => {
+            if (e.target === fullscreenOverlay) {
+                closeFullscreen();
+            }
+        });
+
+        // Touch/swipe support for mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        mainImage.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        mainImage.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            const diff = touchStartX - touchEndX;
+            
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0) {
+                    nextImage(); // Swipe left = next image
+                } else {
+                    prevImage(); // Swipe right = previous image
+                }
+            }
+        }
+
+        // Initialize the gallery when page loads
+        initGallery();
+    </script>
+</body>
+</html>

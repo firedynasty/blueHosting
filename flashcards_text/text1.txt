@@ -1,0 +1,16 @@
+Chinese,English
+姓,surname
+李,Li (surname)
+请问,May I ask
+贵姓,your respected surname
+你好,Hello (informal)
+王,Wang (surname)
+先生,Mr./sir
+叫,to be called/named
+什么,what
+我叫,My name is
+王贵,Wang Gui (name)
+小姐,Miss/Ms.
+李小朋,Li Xiaopeng (name)
+高兴,happy/pleased
+认识,to know/meet

@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Gallery</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a1a;
+            min-height: 100vh;
+            color: white;
+            margin: 0;
+            padding: 0;
+        }
+
+        .gallery-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1 {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 2rem;
+            font-weight: 300;
+            color: #f0f0f0;
+        }
+
+        .main-gallery {
+            position: relative;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 0 20px 20px 20px;
+        }
+
+        .video-display {
+            position: relative;
+            width: 100%;
+            height: calc(100vh - 200px);
+            margin-bottom: 10px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .main-video {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.6);
+            border: none;
+            color: white;
+            font-size: 2rem;
+            padding: 15px 20px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .nav-btn:hover {
+            background: rgba(0,0,0,0.8);
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        .prev-btn {
+            left: 20px;
+        }
+
+        .next-btn {
+            right: 20px;
+        }
+
+        .video-counter {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 1rem;
+            z-index: 10;
+        }
+
+        .video-title {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.7);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 1rem;
+            z-index: 10;
+            max-width: calc(100% - 40px);
+        }
+
+        .thumbnail-container {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding: 8px 0;
+            scroll-behavior: smooth;
+            background: rgba(255,255,255,0.05);
+            border-radius: 6px;
+            margin: 0 -20px;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+
+        .thumbnail-container::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .thumbnail-container::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+        }
+
+        .thumbnail-container::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 3px;
+        }
+
+        .thumbnail-wrapper {
+            position: relative;
+            min-width: 60px;
+            cursor: pointer;
+        }
+
+        .thumbnail {
+            width: 60px;
+            height: 35px;
+            object-fit: cover;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            opacity: 0.7;
+        }
+
+        .thumbnail:hover {
+            transform: scale(1.1);
+            opacity: 1;
+            border-color: rgba(255,255,255,0.4);
+        }
+
+        .thumbnail.active {
+            border-color: #fff;
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .play-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid rgba(255,255,255,0.8);
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+            pointer-events: none;
+        }
+
+        .video-controls {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .control-btn {
+            background: rgba(0,0,0,0.7);
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: rgba(0,0,0,0.9);
+        }
+
+        .instructions {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .gallery-container {
+                padding: 0;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+                margin: 15px 0;
+            }
+
+            .main-gallery {
+                padding: 0 10px 10px 10px;
+            }
+
+            .nav-btn {
+                font-size: 1.5rem;
+                padding: 12px 15px;
+            }
+
+            .prev-btn {
+                left: 10px;
+            }
+
+            .next-btn {
+                right: 10px;
+            }
+
+            .thumbnail {
+                width: 50px;
+                height: 30px;
+            }
+
+            .thumbnail-wrapper {
+                min-width: 50px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="gallery-container">
+        <h1 style="display: none;">🎬 Video Gallery</h1>
+        
+        <div class="main-gallery">
+            <div class="video-display">
+                <video id="mainVideo" class="main-video" controls>
+                    Your browser does not support the video tag.
+                </video>
+                <button class="nav-btn prev-btn" id="prevBtn">‹</button>
+                <button class="nav-btn next-btn" id="nextBtn">›</button>
+                <div class="video-counter" id="videoCounter">1 / 5</div>
+                <div class="video-title" id="videoTitle">Loading...</div>
+                
+                <div class="video-controls">
+                    <button class="control-btn" id="playPauseBtn">⏯️ Play/Pause</button>
+                    <button class="control-btn" id="muteBtn">🔊 Mute</button>
+                    <button class="control-btn" id="fullscreenBtn">⛶ Fullscreen</button>
+                </div>
+            </div>
+            
+            <div class="thumbnail-container" id="thumbnailContainer">
+                <!-- Thumbnails will be generated by JavaScript -->
+            </div>
+            
+            <div class="instructions">
+                Use arrow keys or click buttons to navigate • Click video for play/pause • Use controls for volume and fullscreen
+            </div>
+        </div>
+    </div>
+
+    <script src="video_array.js"></script>
+    <script>
+        // Convert videoArray and videosInfo to the format expected by the gallery
+        const videos = videosInfo.map(video => ({
+            src: video.path,
+            title: video.title
+        }));
+
+        let currentIndex = 0;
+        
+        // DOM elements
+        const mainVideo = document.getElementById('mainVideo');
+        const videoCounter = document.getElementById('videoCounter');
+        const videoTitle = document.getElementById('videoTitle');
+        const thumbnailContainer = document.getElementById('thumbnailContainer');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const muteBtn = document.getElementById('muteBtn');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+
+        // Initialize gallery
+        function initGallery() {
+            generateThumbnails();
+            updateDisplay();
+        }
+
+        // Generate thumbnail videos
+        function generateThumbnails() {
+            thumbnailContainer.innerHTML = '';
+            videos.forEach((video, index) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'thumbnail-wrapper';
+                
+                const thumb = document.createElement('video');
+                thumb.src = video.src;
+                thumb.className = 'thumbnail';
+                thumb.muted = true;
+                thumb.preload = 'metadata';
+                
+                const playIcon = document.createElement('div');
+                playIcon.className = 'play-icon';
+                
+                wrapper.appendChild(thumb);
+                wrapper.appendChild(playIcon);
+                wrapper.addEventListener('click', () => goToVideo(index));
+                
+                thumbnailContainer.appendChild(wrapper);
+            });
+        }
+
+        // Update main display
+        function updateDisplay() {
+            const currentVideo = videos[currentIndex];
+            mainVideo.src = currentVideo.src;
+            videoTitle.textContent = currentVideo.title;
+            videoCounter.textContent = `${currentIndex + 1} / ${videos.length} - ${currentVideo.title}`;
+            
+            // Update active thumbnail
+            const thumbnails = document.querySelectorAll('.thumbnail');
+            thumbnails.forEach((thumb, index) => {
+                thumb.classList.toggle('active', index === currentIndex);
+            });
+            
+            // Scroll active thumbnail into view
+            const activeThumbnail = thumbnails[currentIndex];
+            if (activeThumbnail) {
+                activeThumbnail.parentElement.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'nearest',
+                    inline: 'center' 
+                });
+            }
+        }
+
+        // Navigation functions
+        function nextVideo() {
+            currentIndex = (currentIndex + 1) % videos.length;
+            updateDisplay();
+        }
+
+        function prevVideo() {
+            currentIndex = (currentIndex - 1 + videos.length) % videos.length;
+            updateDisplay();
+        }
+
+        function goToVideo(index) {
+            currentIndex = index;
+            updateDisplay();
+        }
+
+        // Video control functions
+        function togglePlayPause() {
+            if (mainVideo.paused) {
+                mainVideo.play();
+            } else {
+                mainVideo.pause();
+            }
+        }
+
+        function toggleMute() {
+            mainVideo.muted = !mainVideo.muted;
+            muteBtn.textContent = mainVideo.muted ? '🔇 Unmute' : '🔊 Mute';
+        }
+
+        function toggleFullscreen() {
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            } else {
+                mainVideo.requestFullscreen();
+            }
+        }
+
+        // Event listeners
+        prevBtn.addEventListener('click', prevVideo);
+        nextBtn.addEventListener('click', nextVideo);
+        playPauseBtn.addEventListener('click', togglePlayPause);
+        muteBtn.addEventListener('click', toggleMute);
+        fullscreenBtn.addEventListener('click', toggleFullscreen);
+
+        // Video click to play/pause
+        mainVideo.addEventListener('click', togglePlayPause);
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case 'ArrowLeft':
+                case '[':
+                    prevVideo();
+                    break;
+                case 'ArrowRight':
+                case ']':
+                    nextVideo();
+                    break;
+                case ' ':
+                    e.preventDefault();
+                    togglePlayPause();
+                    break;
+                case 'Escape':
+                    if (document.fullscreenElement) {
+                        document.exitFullscreen();
+                    }
+                    break;
+                case 'm':
+                case 'M':
+                    toggleMute();
+                    break;
+                case 'f':
+                case 'F':
+                    toggleFullscreen();
+                    break;
+            }
+        });
+
+        // Auto-pause when switching videos
+        mainVideo.addEventListener('loadstart', () => {
+            mainVideo.pause();
+        });
+
+        // Initialize the gallery when page loads
+        initGallery();
+    </script>
+</body>
+</html>
